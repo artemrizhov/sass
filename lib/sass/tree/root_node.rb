@@ -21,6 +21,7 @@ module Sass
         Visitors::CheckNesting.visit(result) # Check again to validate mixins
         result, extends = Visitors::Cssize.visit(result)
         Visitors::Extend.visit(result, extends)
+        Visitors::Inherit.visit(result)
         result.to_s
       end
     end
