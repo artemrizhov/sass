@@ -1,6 +1,4 @@
 # A visitor for performing tree inheritance on a static CSS tree.
-#
-# Destructively modifies the tree.
 class Sass::Tree::Visitors::Inherit < Sass::Tree::Visitors::Base
   # Performs the given inheritance on the static CSS tree based in `root`.
   #
@@ -57,10 +55,12 @@ class Sass::Tree::Visitors::Inherit < Sass::Tree::Visitors::Base
     # rule.
     for child in inherited.reverse_each
       # Search for not merged rules with same selectors.
-      selectors = child.resolved_rules.to_s
-      for matched in own.select {|c| c.resolved_rules.to_s == selectors}.each
-        # Merge properties.
-        child.children.concat matched.children
+      if child.is_a? Sass::Tree::RuleNode
+        selectors = child.resolved_rules.to_s
+        for matched in own.select {|c| c.resolved_rules.to_s == selectors}.each
+          # Merge properties.
+          child.children.concat matched.children
+        end
       end
       # Remove merged rules from working copy.
       own = own.select {|c| c.resolved_rules.to_s != selectors}
