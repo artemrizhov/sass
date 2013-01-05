@@ -57,6 +57,11 @@ module Sass
       # @return [{Symbol => Object}]
       attr_reader :options
 
+      # Whether or not the node is inherited from another tree.
+      #
+      # @return [Boolean]
+      attr_accessor :inherited
+
       def initialize
         @children = []
       end

@@ -25,9 +25,11 @@ require 'sass/tree/each_node'
 require 'sass/tree/debug_node'
 require 'sass/tree/warn_node'
 require 'sass/tree/import_node'
+require 'sass/tree/inherit_node'
 require 'sass/tree/charset_node'
 require 'sass/tree/visitors/base'
 require 'sass/tree/visitors/perform'
+require 'sass/tree/visitors/inherit'
 require 'sass/tree/visitors/cssize'
 require 'sass/tree/visitors/extend'
 require 'sass/tree/visitors/convert'
@@ -659,6 +661,8 @@ WARNING
       case directive
       when 'import'
         parse_import(line, value, offset)
+      when 'inherit'
+        parse_inherit(line, value, offset)
       when 'mixin'
         parse_mixin_definition(line)
       when 'content'
@@ -825,6 +829,42 @@ WARNING
       else
         Tree::ImportNode.new(val)
       end
+    end
+
+    def parse_inherit(line, value, offset)
+      raise SyntaxError.new("Illegal nesting: Nothing may be nested beneath inherit directives.",
+                            :line => @line + 1) unless line.children.empty?
+
+      scanner = Sass::Util::MultibyteStringScanner.new(value)
+      values = []
+
+      loop do
+        unless node = parse_inherit_arg(scanner, offset + scanner.pos)
+          raise SyntaxError.new("Invalid @inherit: expected file to import, was #{scanner.rest.inspect}",
+                                :line => @line)
+        end
+        values << node
+        break unless scanner.scan(/,\s*/)
+      end
+
+      if scanner.scan(/;/)
+        raise SyntaxError.new("Invalid @inherit: expected end of line, was \";\".",
+                              :line => @line)
+      end
+
+      return values
+    end
+
+    def parse_inherit_arg(scanner, offset)
+      return if scanner.eos?
+
+      unless str = scanner.scan(Sass::SCSS::RX::STRING)
+        return Tree::InheritNode.new(scanner.scan(/[^,;]+/))
+      end
+
+      val = scanner[1] || scanner[2]
+      scanner.scan(/\s*/)
+      Tree::InheritNode.new(val)
     end
 
     MIXIN_DEF_RE = /^(?:=|@mixin)\s*(#{Sass::SCSS::RX::IDENT})(.*)$/

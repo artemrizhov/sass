@@ -122,7 +122,7 @@ module Sass
       end
 
       DIRECTIVES = Set[:mixin, :include, :function, :return, :debug, :warn, :for,
-        :each, :while, :if, :else, :extend, :import, :media, :charset, :content,
+        :each, :while, :if, :else, :extend, :import, :inherit, :media, :charset, :content,
         :_moz_document]
 
       PREFIXED_DIRECTIVES = Set[:supports]
@@ -330,6 +330,30 @@ module Sass
       end
 
       def use_css_import?; false; end
+
+      def inherit_directive
+        values = []
+
+        loop do
+          values << expr!(:inherit_arg)
+          break if !tok(/,\s*/)
+        end
+
+        return values
+      end
+
+      def inherit_arg
+        line = @line
+        return unless (str = tok(STRING))
+
+        path = @scanner[1] || @scanner[2]
+        ss
+
+        media = media_query_list
+        node = Sass::Tree::InheritNode.new(path.strip)
+        node.line = line
+        node
+      end
 
       def media_directive
         block(node(Sass::Tree::MediaNode.new(expr!(:media_query_list).to_a)), :directive)
@@ -1034,6 +1058,7 @@ MESSAGE
         :_selector => "selector",
         :simple_selector_sequence => "selector",
         :import_arg => "file to import (string or url())",
+        :inherit_arg => "file to inherit (string)",
         :moz_document_function => "matching function (e.g. url-prefix(), domain())",
         :supports_condition => "@supports condition (e.g. (display: flexbox))",
         :supports_condition_in_parens => "@supports condition (e.g. (display: flexbox))",

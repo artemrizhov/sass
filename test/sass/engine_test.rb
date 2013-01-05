@@ -766,6 +766,13 @@ CSS
 SASS
   end
 
+  def test_sass_inherit
+    sassc_file = sassc_path("inherit")
+    assert !File.exists?(sassc_file)
+    renders_correctly "inherit", { :style => :compact, :load_paths => [File.dirname(__FILE__) + "/templates"] }
+    assert File.exists?(sassc_file)
+  end
+
   def test_units
     renders_correctly "units"
   end

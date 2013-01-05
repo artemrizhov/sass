@@ -1,0 +1,8 @@
+local1 { local: 1; }
+
+common2 { test: 2; }
+
+common { inherited2: yes; inherited: yes; noninherited: yes; }
+common common3 { test: 3; }
+
+local2 { local: 2; }
