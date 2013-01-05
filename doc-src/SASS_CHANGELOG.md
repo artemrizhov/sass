@@ -3,6 +3,29 @@
 * Table of contents
 {:toc}
 
+## 3.2.5
+
+* Fix a bug where bogus `@extend` warnings were being generated.
+
+* Fix an `@import` bug on Windows. Thanks to [Darryl
+  Miles](https://github.com/dlmiles).
+
+* Ruby 2.0.0-preview compatibility. Thanks to [Eric
+  Saxby](http://www.livinginthepast.org/).
+
+* Fix incorrect line numbering when using DOS line endings with the indented
+  syntax.
+
+## 3.2.4
+
+* Fix imports from `.jar` files in JRuby. Thanks to [Alex
+  Hvostov](https://github.com/argv-minus-one).
+
+* Allow comments within `@import` statements in SCSS.
+
+* Fix a parsing performance bug where long decimals would occasionally take many
+  minutes to parse.
+
 ## 3.2.3
 
 * `sass --watch` no longer crashs when a file in a watched directory is deleted.

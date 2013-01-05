@@ -91,8 +91,14 @@ module Sass
         sorted_exts = extensions.sort
         syntax = extensions[extname]
 
-        return [["#{dirname}/{_,}#{basename}.#{extensions.invert[syntax]}", syntax]] if syntax
-        sorted_exts.map {|ext, syn| ["#{dirname}/{_,}#{basename}.#{ext}", syn]}
+        if syntax
+          ret = [["#{dirname}/{_,}#{basename}.#{extensions.invert[syntax]}", syntax]]
+        else
+          ret = sorted_exts.map {|ext, syn| ["#{dirname}/{_,}#{basename}.#{ext}", syn]}
+        end
+
+        # JRuby chokes when trying to import files from JARs when the path starts with './'.
+        ret.map {|f, s| [f.sub(%r{^\./}, ''), s]}
       end
 
       def escape_glob_characters(name)
@@ -109,6 +115,9 @@ module Sass
       # @param name [String] The filename to search for.
       # @return [(String, Symbol)] A filename-syntax pair.
       def find_real_file(dir, name, options)
+        # on windows 'dir' can be in native File::ALT_SEPARATOR form
+        dir = dir.gsub(File::ALT_SEPARATOR, File::SEPARATOR) unless File::ALT_SEPARATOR.nil?
+
         found = possible_files(remove_root(name)).map do |f, s|
           path = (dir == "." || Pathname.new(f).absolute?) ? f : "#{dir}/#{f}"
           Dir[path].map do |full_path|
@@ -118,7 +127,7 @@ module Sass
         end
         found = Sass::Util.flatten(found, 1)
         return if found.empty?
-  
+
         if found.size > 1 && !@same_name_warnings.include?(found.first.first)
           found.each {|(f, _)| @same_name_warnings << f}
           relative_to = Pathname.new(dir)
@@ -143,7 +152,6 @@ WARNING
 WARNING: In #{File.dirname(name)}:
   There are multiple files that match the name "#{File.basename(name)}":
 #{candidates}
-  This will be an error in future versions of Sass.
 WARNING
           end
         end
