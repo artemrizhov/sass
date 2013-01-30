@@ -1,3 +1,45 @@
+# Notes about this Fork
+
+This fork provides the `@inherit` directive which is more intelligent version
+of `@include`. The difference is that it combines sets of CSS rules when
+selectors are identical, and so removes duplicate code. It may be usefull in
+case if you want to move some common rules to a separated file, but the size
+of generated file is very important. If you found another use cases then please
+let me know! :)
+
+## Installation
+
+    $ git clone git://github.com/artemrizhov/sass.git sass
+    $ cd sass
+    $ gem build sass.gemspec
+    $ sudo gem install sass--version.gem
+
+## Using the inheritance
+
+Suppose you have `_base.scss` and `green_theme.scss`. The base file contains
+styles that are common for all themes:
+
+    body { font: Verdana; }
+    .header { height: 200px; }
+
+The theme file inherits the base file and defines some additional properties.
+
+    @inherit '_base.scss'
+
+    body { color: #0f0; }
+    a { color: #0b0; }
+
+The resulting file inherits the structure of styles from the base file
+(body, .header), merges rules with similar selectors (body) and appends
+(or prepends) new selectors.
+
+    body { font: Verdana; color: #0f0; }
+    .header { height: 200px; }
+
+    a { color: #0b0; }
+
+That's all :) Please create issue if you found a bug or have some suggestions.
+
 # Sass
 
 **Sass makes CSS fun again**. Sass is an extension of CSS3,
